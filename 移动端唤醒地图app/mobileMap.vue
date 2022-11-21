@@ -1,193 +1,128 @@
 <template>
-    <view class="box">
-        <!-- <span class="pd">{{text}}</span> -->
-        <view class='btn' @click="clickFun">
-            <span>{{this.customBrowserVersion().android ? 'android' : this.customBrowserVersion().ios ? 'ios' : '其他'}}</span> -
-            <span>调用地图</span>
-        </view>
+    <view class="mobilemap" @click="clickFun">
+        <slot></slot>
     </view>
 </template>
 
 <script>
 export default {
     /**
-     * h5地图使用跳转
+     * h5地图跳转
      * @Author  chencz
      * @Time    2022-11-16
-     * @description 浏览器中唤醒地图app/打开网页版地图
-     * @Version 1.0.0
-     * @property {Number | String} pattern 定位模式 0- 经纬度 1-地名
+     * @description 浏览器中唤醒地图app/打开网页版地图, safari浏览器频繁唤醒打开app会触发打开h5地图
+     * @description 高德地图需要经纬度+地名  百度地图需要经纬度
+     * @Version 1.0.1
+     * @property {String} software 软件名, gd-高德 bd-百度
+     * @property {String} partnerAddress 地名
+     * @property {String | Number} lng 经度
+     * @property {String | Number} lat 维度
      * @example <mobile-map />
      */
     data() {
         return {
-            partnerAddress: '北院门街道庙后街14号',
-            lng: '108.944771',
-            lat: '34.26907',
-            cutShow: false, // 唤醒地图app则说明页面隐藏过, 则不打开H5地图, 否则打开H5地图
-            text: '',
+            cutShow: false, // 页面是否切换
+            skipTime: null,
+            tipsTime: null,
         };
     },
     props: {
-        pattern: {
+        software: {
+            type: String,
+            default: 'gd'
+        },
+        partnerAddress: {
+            type: String,
+            default: '天安门广场'
+        },
+        lng: {
             type: String | Number,
-            default: 0
-        }
+            default: 116.39744,
+            required: true
+        },
+        lat: {
+            type: String | Number,
+            default: 39.909192,
+            required: true
+        },
     },
     created() {
-        let obj = this.customBrowserVersion();
-        let obj1 = {};
-        for (const key in obj) {
-            if (obj[key]) {
-                obj1[key] = obj[key];
+        // 监听页面切换
+        document.addEventListener("visibilitychange", () => {
+            this.clearTimeoutFun();
+            if (document.visibilityState == 'hidden') {
+                this.cutShow = true;
+            } else if (document.visibilityState == 'visible') {
+                this.cutShow = false;
             }
+        });
+
+        const isIos = !!window.navigator.userAgent.match(/\(i[^;]+;( equipment;)? CPU.+Mac OS X/);
+        if (isIos) {
+            // ios中页面后退可能空白则刷新
+            window.addEventListener('pageshow', () => {
+                window.location.reload();
+            });
+            window.addEventListener('pagehide', () => {
+                this.cutShow = true;
+            });
         }
-        this.text = obj1;
-    },
-    onShow() {
-        this.cutShow = false;
-    },
-    onHide() {
-        this.cutShow = true;
     },
     methods: {
+        // 点击事件
         clickFun() {
-            this.guide('bd');
+            this.cutShow = false;
+            this.guide(this.software);
         },
+        // 跳转逻辑
         guide(signMap = 'gd') {
-            let address = this.partnerAddress;
-            if (address) {
-                let self = this;
-                let lngValue = this.lng;
-                let latValue = this.lat;
-                let { android, ios, weixin, mobile } = this.customBrowserVersion();
+            let { android, ios, weixin, mobile } = this.customBrowserVersion();
 
-                let tips = {
-                    gd: '高德',
-                    bd: '百度',
-                };
-                let tipsText = tips[signMap];
-                if (signMap == 'gd') {
-                    // 高德地图
+            let tips = {
+                gd: '高德',
+                bd: '百度',
+            };
+            let tipsText = tips[signMap];
+            if (signMap === 'gd') {
+                // 高德地图
 
-                    if (android) {
-                        // 安卓
-                        if (!weixin && mobile) {
-                            // 不是在微信 && 移动端
-
-                            // app唤醒
-                            window.location.href = `androidamap://viewMap?sourceApplication=appname&poiname=${address}&lat=${latValue}&lon=${lngValue}&dev=0`;
-                        }
-                        setTimeout(() => {
-                            if (!self.cutShow) {
-                                self.toast(`即将前往${tipsText}地图网页版`);
-                            }
-                        }, 1500);
-
-                        setTimeout(() => {
-                            // 判断是否有打开软件, 否则打开h5地图
-                            if (!self.cutShow) {
-                                //调用高德h5地图
-                                window.location.href = `https://uri.amap.com/marker?position=${lngValue},${latValue}&name=${address}`;
-                            }
-                        }, 2000);
-                    } else if (ios) {
-                        // 苹果
-                        if (!weixin && mobile) {
-                            // 不是在微信 && 移动端
-
-                            // app唤醒
-                            window.location.href = `iosamap://viewMap?sourceApplication=appname&poiname=${address}&lat=${latValue}&lon=${lngValue}&dev=0`;
-                        }
-
-                        setTimeout(() => {
-                            if (!self.cutShow) {
-                                self.toast(`即将前往${tipsText}地图网页版`);
-                            }
-                        }, 1500);
-
-                        setTimeout(function () {
-                            // 判断是否有打开软件, 否则打开h5地图
-                            if (!self.cutShow) {
-                                window.location.href = `https://uri.amap.com/marker?position=${lngValue},${latValue}"&name=${address}`;
-                            }
-                        }, 2000);
-                    } else {
-                        if (!self.cutShow) {
-                            this.toast(`即将前往${tipsText}地图网页版`);
-                        }
-
-                        setTimeout(() => {
-                            // 判断是否有打开软件, 否则打开h5地图
-                            if (!self.cutShow) {
-                                //调用高德h5地图
-                                window.location.href = `https://uri.amap.com/marker?position=${lngValue},${latValue}&name=${address}`;
-                            }
-                        }, 1500);
-                    }
-                } else if (signMap == 'bd') {
-                    // 百度地图
-
-                    if (android) {
-                        if (!weixin && mobile) {
-                            // 不是在微信 && 移动端
-
-                            // app唤醒
-                            window.location.href = `androidamap://viewMap?sourceApplication=appname&poiname=${address}&lat=${latValue}&lon=${lngValue}&dev=0`;
-                        }
-
-                        setTimeout(() => {
-                            if (!self.cutShow) {
-                                this.toast(`即将前往${tipsText}地图网页版`);
-                            }
-                        }, 1500);
-
-                        setTimeout(() => {
-                            if (!self.cutShow) {
-                                window.location.href = `http://api.map.baidu.com/marker?location=${latValue},${lngValue}&title=${address}&content=景点&output=html&src=webapp.baidu.openAPIdemo`;
-                            }
-                        }, 2000);
-                    } else if (ios) {
-                        //ios操作系统
-                        if (!weixin && mobile) {
-                            // 不是在微信 && 移动端
-
-                            // app唤醒
-                            if (this.pattern == 1) {
-                                window.location.href = `baidumap://map/geocoder?location=${latValue},${lngValue}&coord_type=gcj02&src=ios.baidu.openAPIdemo`;
-                            } else {
-                                window.location.href = `baidumap://map/geocoder?address=${address}&src=ios.baidu.openAPIdemo`;
-                            }
-
-                        }
-
-                        setTimeout(() => {
-                            if (!self.cutShow) {
-                                this.toast(`即将前往${tipsText}地图网页版`);
-                            }
-                        }, 1500);
-
-                        setTimeout(() => {
-                            if (!self.cutShow) {
-                                window.location.href = `http://api.map.baidu.com/marker?location=${latValue},${lngValue}&title=${address}&content=景点&output=html&src=webapp.baidu.openAPIdemo`;
-                            }
-                        }, 2000);
-                    } else {
-                        if (!self.cutShow) {
-                            this.toast(`即将前往${tipsText}地图网页版`);
-                        }
-                        setTimeout(() => {
-                            window.location.href = `http://api.map.baidu.com/marker?location=${latValue},${lngValue}&title=${address}&content=景点&output=html&src=webapp.baidu.openAPIdemo`;
-                        }, 1500);
-                    }
+                if (android) {
+                    // 安卓
+                    this.appSkipFun(signMap, 'android', weixin, mobile);
+                    this.tipsFun(tipsText);
+                    this.H5SkipFun();
+                } else if (ios) {
+                    // ios
+                    this.appSkipFun(signMap, 'ios', weixin, mobile);
+                    this.tipsFun(tipsText);
+                    this.H5SkipFun();
+                } else {
+                    // 其他
+                    this.tipsFun(tipsText, 500);
+                    this.H5SkipFun(signMap, 1500);
                 }
-            } else {
-                this.toast('暂不知道该地址');
+            } else if (signMap === 'bd') {
+                // 百度地图
+                if (android) {
+                    // 安卓
+                    this.appSkipFun(signMap, 'android', weixin, mobile);
+                    this.tipsFun(tipsText);
+                    this.H5SkipFun(signMap);
+                } else if (ios) {
+                    //ios操作系统
+                    this.appSkipFun(signMap, 'ios', weixin, mobile);
+                    this.tipsFun(tipsText);
+                    this.H5SkipFun(signMap);
+                } else {
+                    // 其他
+                    this.tipsFun('', 500);
+                    this.H5SkipFun(signMap, 1500);
+                }
             }
         },
         //设备区分
         customBrowserVersion() {
-            let equipment = navigator.userAgent;
+            let equipment = window.navigator.userAgent;
             return {
                 trident: equipment.indexOf('Trident') > -1, //IE内核
                 presto: equipment.indexOf('Presto') > -1, //opera内核
@@ -207,30 +142,78 @@ export default {
                 isUc: equipment.indexOf('ucbrowser') !== -1, //是否为uc浏览器
             };
         },
+        // 定时器清除
+        clearTimeoutFun() {
+            if (this.tipsTime) {
+                clearTimeout(this.tipsTime);
+                this.tipsTime = null;
+            }
+            if (this.skipTime) {
+                clearTimeout(this.skipTime);
+                this.skipTime = null;
+            }
+        },
+        /**
+         * @description 提示信息
+         * @param {string} tipsText 提示文字
+         * @param {number} time 延迟时间
+         */
+        tipsFun(tipsText, time = 1500) {
+            this.tipsTime = setTimeout(() => {
+                if (!self.cutShow) {
+                    self.toast(`即将前往${tipsText}地图网页版`);
+                }
+            }, time);
+        },
+        /**
+         * @description 打开h5版地图
+         * @param {string} signMap gd-高德地图 bd-百度地图
+         * @param {number} time 延迟时间
+         */
+        H5SkipFun(signMap = 'gd', time = 2000) {
+            let lngValue = this.lng;
+            let latValue = this.lat;
+            let address = this.partnerAddress;
+            let self = this;
+            if (signMap === 'gd') {
+                this.skipTime = setTimeout(() => {
+                    // 判断是否有打开软件, 否则打开h5地图
+                    if (!self.cutShow) {
+                        //调用高德h5地图
+                        window.location.href = `https://uri.amap.com/marker?position=${lngValue},${latValue}&name=${address}`;
+                    }
+                }, time);
+            } else if (signMap === 'bd') {
+                this.skipTime = setTimeout(() => {
+                    if (!self.cutShow) {
+                        window.location.href = `http://api.map.baidu.com/marker?location=${latValue},${lngValue}&title=${address}&content=景点&output=html&src=webapp.baidu.openAPIdemo`;
+                    }
+                }, 2000);
+            }
+        },
+        /**
+         * @description app唤醒
+         * @param {string} signMap gd-高德地图 bd-百度地图
+         * @param {string} system 操作系统 android ios
+         * @param {boolean} weixin 微信端
+         * @param {boolean} mobile 移动端
+         */
+        appSkipFun(signMap = 'gd', system = 'android', weixin, mobile) {
+            if (!weixin && mobile) {
+                // 不是在微信 && 移动端
+                let address = this.partnerAddress;
+                let lngValue = this.lng;
+                let latValue = this.lat;
+                // 不是在微信 && 移动端
+                if (signMap === 'gd') {
+                    window.location.href = `${system}amap://viewMap?sourceApplication=appname&poiname=${address}&lat=${latValue}&lon=${lngValue}&dev=0`;
+                } else if (signMap === 'bd') {
+                    window.location.href = `baidumap://map/geocoder?location=${latValue},${lngValue}&coord_type=gcj02&src=${system}.baidu.openAPIdemo`;
+                }
+            }
+        },
     }
 }
 </script>
 
-<style lang="scss" scoped>
-.box {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn {
-    display: flex;
-    justify-content: center;
-    width: 50vw;
-    height: 100px;
-    background: #ffcc33;
-    color: #ff4a26;
-    text-align: center;
-    line-height: 100px;
-    border-radius: 10px;
-}
-.pd {
-    padding: 20px;
-}
-</style>
+<style lang="scss" scoped></style>
