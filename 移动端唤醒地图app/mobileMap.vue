@@ -10,9 +10,9 @@ export default {
      * h5地图跳转
      * @Author  chencz
      * @Time    2022-11-16
-     * @description 浏览器中唤醒地图app/打开网页版地图, safari浏览器频繁唤醒打开app会触发打开h5地图
+     * @description 浏览器中唤醒地图app/打开网页版地图, safari浏览器频繁唤醒打开app会触发打开h5地图, 在pc端调试时请把移动端模拟器关闭, 否则会多次触发ios刷新逻辑
      * @description 高德地图需要经纬度+地名  百度地图需要经纬度
-     * @Version 1.0.1
+     * @Version 1.0.2
      * @property {String} software 软件名, gd-高德 bd-百度
      * @property {String} partnerAddress 地名
      * @property {String | Number} lng 经度
@@ -109,7 +109,7 @@ export default {
                     this.tipsFun(tipsText);
                     this.H5SkipFun(signMap);
                 } else if (ios) {
-                    //ios操作系统
+                    //ios
                     this.appSkipFun(signMap, 'ios', weixin, mobile);
                     this.tipsFun(tipsText);
                     this.H5SkipFun(signMap);
@@ -160,8 +160,8 @@ export default {
          */
         tipsFun(tipsText, time = 1500) {
             this.tipsTime = setTimeout(() => {
-                if (!self.cutShow) {
-                    self.toast(`即将前往${tipsText}地图网页版`);
+                if (!this.cutShow) {
+                    this.toast(`即将前往${tipsText}地图网页版`);
                 }
             }, time);
         },
@@ -174,18 +174,17 @@ export default {
             let lngValue = this.lng;
             let latValue = this.lat;
             let address = this.partnerAddress;
-            let self = this;
             if (signMap === 'gd') {
                 this.skipTime = setTimeout(() => {
                     // 判断是否有打开软件, 否则打开h5地图
-                    if (!self.cutShow) {
+                    if (!this.cutShow) {
                         //调用高德h5地图
                         window.location.href = `https://uri.amap.com/marker?position=${lngValue},${latValue}&name=${address}`;
                     }
                 }, time);
             } else if (signMap === 'bd') {
                 this.skipTime = setTimeout(() => {
-                    if (!self.cutShow) {
+                    if (!this.cutShow) {
                         window.location.href = `http://api.map.baidu.com/marker?location=${latValue},${lngValue}&title=${address}&content=景点&output=html&src=webapp.baidu.openAPIdemo`;
                     }
                 }, 2000);
