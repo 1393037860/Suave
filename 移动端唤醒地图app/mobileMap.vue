@@ -12,7 +12,7 @@ export default {
      * @Time    2022-11-16
      * @description 浏览器中唤醒地图app/打开网页版地图, safari浏览器频繁唤醒打开app会触发打开h5地图, 在pc端调试时请把移动端模拟器关闭, 否则会多次触发ios刷新逻辑
      * @description 高德地图需要经纬度+地名  百度地图需要经纬度
-     * @Version 1.0.2
+     * @Version 1.0.3
      * @property {String} software 软件名, gd-高德 bd-百度
      * @property {String} partnerAddress 地名
      * @property {String | Number} lng 经度
@@ -83,39 +83,15 @@ export default {
                 bd: '百度',
             };
             let tipsText = tips[signMap];
-            if (signMap === 'gd') {
-                // 高德地图
-
-                if (android) {
-                    // 安卓
-                    this.appSkipFun(signMap, 'android', weixin, mobile);
+            if (['gd', 'bd'].includes(signMap)) {
+                // 高德地图 || 百度地图
+                if (android || ios) {
+                    this.appSkipFun(signMap, android ? 'android' : 'ios', weixin, mobile);
                     this.tipsFun(tipsText);
-                    this.H5SkipFun();
-                } else if (ios) {
-                    // ios
-                    this.appSkipFun(signMap, 'ios', weixin, mobile);
-                    this.tipsFun(tipsText);
-                    this.H5SkipFun();
+                    this.H5SkipFun(signMap);
                 } else {
-                    // 其他
+                    // 其他设备
                     this.tipsFun(tipsText, 500);
-                    this.H5SkipFun(signMap, 1500);
-                }
-            } else if (signMap === 'bd') {
-                // 百度地图
-                if (android) {
-                    // 安卓
-                    this.appSkipFun(signMap, 'android', weixin, mobile);
-                    this.tipsFun(tipsText);
-                    this.H5SkipFun(signMap);
-                } else if (ios) {
-                    //ios
-                    this.appSkipFun(signMap, 'ios', weixin, mobile);
-                    this.tipsFun(tipsText);
-                    this.H5SkipFun(signMap);
-                } else {
-                    // 其他
-                    this.tipsFun('', 500);
                     this.H5SkipFun(signMap, 1500);
                 }
             }
