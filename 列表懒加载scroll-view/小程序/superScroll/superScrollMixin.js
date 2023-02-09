@@ -1,3 +1,4 @@
+import { arrayDetectionFun } from './common.js';
 export const superScrollMixin = {
     data() {
         return {};

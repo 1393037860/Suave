@@ -1,11 +1,12 @@
 <template>
-    <scroll-view class="superScroll" ref="scrollRef" :scroll-y="scrollY" :scroll-x="scrollX" :scroll-top="scrollTop" :scroll-left="scrollLeft" :scroll-with-animation="scrollWithAnimation" :show-scrollbar="showScrollbar" :refresher-enabled='refresherEnabled' :refresher-triggered="triggered" :style="[supStyle]" @scroll="scrollFun" @scrolltolower="scrolltolowerFun" @refresherrefresh="onRefreshFun" @refresherrestore="onRestoreFun" @refresherpulling="onPullingFun">
+    <scroll-view class="superScroll" ref="scrollRef" :scroll-y="scrollY" :scroll-x="scrollX" :scroll-top="scrollTop" :scroll-left="scrollLeft" :scroll-with-animation="scrollWithAnimation" :show-scrollbar="showScrollbar" :refresher-enabled='refresherEnabled' :refresher-triggered="triggered" :style="[supStyle]" @scroll="onScroll" @scrolltolower="scrolltolowerFun" @refresherrefresh="onRefreshFun" @refresherrestore="onRestoreFun" @refresherpulling="onPullingFun">
         <slot></slot>
     </scroll-view>
 </template>
 
 <script>
 import { superScrollMixin } from './superScrollMixin.js';
+import { throttleFun, arrayDetectionFun } from './common.js';
 export default {
     mixins: [superScrollMixin],
     name: 'superScroll',
@@ -33,6 +34,7 @@ export default {
          * @property {String} refresherBackground 设置自定义下拉刷新区域背景颜色
          * @property {Array} dataArr 列表数据
          * @property {Object} supStyle 样式
+         * @property {Number | String} delay 节流时间 单位毫秒
          * @example <super-scroll />
          */
         scrollX: {
@@ -95,14 +97,20 @@ export default {
                 return {};
             },
         },
+        delay: {
+            type: [Number, String],
+            default: 500,
+        },
     },
     data() {
         return {
             triggered: true,
+            onScroll: () => { },
         };
     },
     mounted() {
         this.scrollFun();
+        this.onScroll = throttleFun(this.scrollFun, this.delay);
     },
     methods: {
         // 初始化 || 滚动时触发
@@ -131,7 +139,6 @@ export default {
         },
         // 滚动到底部
         scrolltolowerFun({ target }) {
-            console.log('==>', 5);
             this.$emit('scrolltolower', target);
         },
     }
