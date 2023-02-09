@@ -13,10 +13,12 @@ export default {
     /**
      * @Author  chencz
      * @Time    2023-2-1
-     * @Version 1.0.0
+     * @Version 1.0.1
      * @description superScroll组件封装
      * @description 小程序不支持 v-bind="$attrs" v-on="$listeners",
      * @description 小程序用不了 <component> 组件, 自行使用vif判断组件渲染初始化吧, better-scroll 更好用, 小程序不支持
+     * @description 节流滚动, 去掉props传数据改为mixins
+     * @description 使用方式自行看goodsList
      */
     props: {
         /**
@@ -32,7 +34,6 @@ export default {
          * @property {Boolean} refresherEnabled 开启自定义下拉刷新
          * @property {Number} refresherThreshold 设置自定义下拉刷新阈值
          * @property {String} refresherBackground 设置自定义下拉刷新区域背景颜色
-         * @property {Array} dataArr 列表数据
          * @property {Object} supStyle 样式
          * @property {Number | String} delay 节流时间 单位毫秒
          * @example <super-scroll />
@@ -85,12 +86,6 @@ export default {
             type: String,
             default: "#FFF"
         },
-        dataArr: {
-            type: Array,
-            default: () => {
-                return [];
-            },
-        },
         supStyle: {
             type: Object,
             default: () => {
@@ -109,12 +104,12 @@ export default {
         };
     },
     mounted() {
-        this.scrollFun();
-        this.onScroll = throttleFun(this.scrollFun, this.delay);
+        this.initScrollFun();
+        this.onScroll = throttleFun(this.initScrollFun, this.delay);
     },
     methods: {
         // 初始化 || 滚动时触发
-        scrollFun(event = {}) {
+        initScrollFun(event = {}) {
             let { target } = event;
             this.$emit('scroll', { target });
         },

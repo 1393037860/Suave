@@ -6,15 +6,19 @@
 
 <script>
 import { querySelectorFun, throttleFun, arrayDetectionFun } from './common.js';
+import { superScrollMixin } from './superScrollMixin.js';
 export default {
+    mixins: [superScrollMixin],
     name: 'superScroll',
     /**
      * @Author  chencz
      * @Time    2023-2-1
-     * @Version 1.0.0
+     * @Version 1.0.1
      * @description superScroll组件封装
      * @description 小程序不支持 v-bind="$attrs" v-on="$listeners"
      * @description 小程序用不了 <component> 组件, 自行使用vif判断组件渲染初始化吧, better-scroll 更好用, 小程序不支持
+     * @description 节流滚动, 去掉props传数据改为mixins
+     * @description 使用方式自行看goodsList
      */
     props: {
         /**
@@ -32,7 +36,6 @@ export default {
          * @property {Boolean} nodeFlag 返回查询节点信息
          * @property {String} selectorName 查询节点名称
          * @property {String} refresherBackground 设置自定义下拉刷新区域背景颜色
-         * @property {Array} dataArr 列表数据
          * @property {Number | String} delay 节流时间 单位毫秒
          * @example <super-scroll />
          */
@@ -92,12 +95,6 @@ export default {
             type: String,
             default: "#FFF"
         },
-        dataArr: {
-            type: Array,
-            default: () => {
-                return [];
-            },
-        },
         supStyle: {
             type: Object,
             default: () => {
@@ -128,7 +125,7 @@ export default {
                     if (this.arrayDetectionFun(result)) {
                         result.map((iterator, index) => {
                             let { top } = iterator;
-                            let dataItem = this.dataArr[index];
+                            let dataItem = this.supReadFun()[index];
                             if (dataItem) {
                                 // requestFlag 已发送请求标记
                                 if (top < this.$webviewHeight && !dataItem.requestFlag) {
