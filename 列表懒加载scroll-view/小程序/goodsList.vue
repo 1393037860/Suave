@@ -1,8 +1,8 @@
 <template>
     <div>
-        <super-scroll v-if="goodsList.length" :scroll-y='true' :scroll-with-animation='true' :supStyle='{paddingTop: "100rpx"}' @scroll="supScrollFun($event, true, '.goods-content')" @scrolltolower='scrolltolowerFun'>
+        <super-scroll v-if="goodsList.length" :scroll-y='true' :scroll-with-animation='true' :supStyle='{paddingTop: "100rpx"}' @scroll="supScrollFun($event, true, '.super-list')" @scrolltolower='scrolltolowerFun'>
             <view class="list-content">
-                <view class="goods-content" v-for="(item,index) in goodsList"></view>
+                <view :class="['goods-content', item.requestFlag ? '' : 'super-list']" v-for="(item,index) in goodsList"></view>
             </view>
         </super-scroll>
     </div>

@@ -1,4 +1,5 @@
 let dataArr = [];
+let querySelectorArr = null;
 export const superScrollMixin = {
     data() {
         return {};
@@ -19,18 +20,22 @@ export const superScrollMixin = {
          * @param {String} selectorName 查询节点名称
          * @param {Function} SupAcceptFun 固定函数名, 在调用页面写一个 SupAcceptFun 接收参数
          */
-         supScrollFun(evnet = {}, nodeFlag = false, selectorName = '') {
+        supScrollFun(evnet = {}, nodeFlag = false, selectorName = '') {
             let { target } = evnet;
-            if (nodeFlag && selectorName) {
+            if (nodeFlag && selectorName && (!querySelectorArr || querySelectorArr.length)) {
                 this.querySelectorFun(selectorName, true).then(result => {
+                    querySelectorArr = result;
                     if (this.arrayDetectionFun(result)) {
                         result.map((iterator, index) => {
                             let { top } = iterator;
-                            let dataItem = this.supReadFun()[index];
-                            if (dataItem) {
-                                if (top < this.$webviewHeight && !dataItem.requestFlag) {
-                                    dataItem.requestFlag = true;
-                                    this.SupAcceptFun({ target, index });
+                            let findCurrent = this.supReadFun().findIndex(list => !list.requestFlag);
+                            if (findCurrent != -1) {
+                                let dataItem = this.supReadFun()[findCurrent];
+                                if (dataItem) {
+                                    if (top < this.$webviewHeight && !dataItem.requestFlag) {
+                                        dataItem.requestFlag = true;
+                                        this.SupAcceptFun({ target, index: findCurrent });
+                                    }
                                 }
                             }
                         });

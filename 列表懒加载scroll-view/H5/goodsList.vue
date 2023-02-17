@@ -1,8 +1,8 @@
 <template>
     <div>
-        <component :is="supName" :scroll-y='true' :scroll-with-animation='true' :nodeFlag='true' selectorName='.goods-content' :supStyle='{height: "calc(100vh - 100rpx)"}' @scroll='supScrollFun' @scrolltolower='scrolltolowerFun'>
+        <component :is="supName" :scroll-y='true' :scroll-with-animation='true' :nodeFlag='true' selectorName='.super-list' :supStyle='{height: "calc(100vh - 100rpx)"}' @scroll='supScrollFun' @scrolltolower='scrolltolowerFun'>
             <view class="list-content">
-                <view class="goods-content" v-for="(item,index) in goodsList"></view>
+                <view :class="['goods-content', item.requestFlag ? '' : 'super-list']" v-for="(item,index) in goodsList"></view>
             </view>
         </component>
     </div>

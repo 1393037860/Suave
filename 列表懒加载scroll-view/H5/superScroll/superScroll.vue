@@ -7,6 +7,7 @@
 <script>
 import { querySelectorFun, throttleFun, arrayDetectionFun } from './common.js';
 import { superScrollMixin } from './superScrollMixin.js';
+let querySelectorArr = null;
 export default {
     mixins: [superScrollMixin],
     name: 'superScroll',
@@ -120,17 +121,21 @@ export default {
         // 初始化 || 滚动时触发
         scrollFun(event = {}) {
             let { target } = event;
-            if (this.nodeFlag && this.selectorName) {
+            if (this.nodeFlag && this.selectorName && (!querySelectorArr || querySelectorArr.length)) {
                 this.querySelectorFun(this.selectorName, true).then(result => {
+                    querySelectorArr = result;
                     if (this.arrayDetectionFun(result)) {
                         result.map((iterator, index) => {
                             let { top } = iterator;
-                            let dataItem = this.supReadFun()[index];
-                            if (dataItem) {
-                                // requestFlag 已发送请求标记
-                                if (top < this.$webviewHeight && !dataItem.requestFlag) {
-                                    dataItem.requestFlag = true;
-                                    this.$emit('scroll', { target, index });
+                            let findCurrent = this.supReadFun().findIndex(list => !list.requestFlag);
+                            if (findCurrent != -1) {
+                                let dataItem = this.supReadFun()[findCurrent];
+                                if (dataItem) {
+                                    // requestFlag 已发送请求标记
+                                    if (top < this.$webviewHeight && !dataItem.requestFlag) {
+                                        dataItem.requestFlag = true;
+                                        this.$emit('scroll', { target, index: findCurrent });
+                                    }
                                 }
                             }
                         });
