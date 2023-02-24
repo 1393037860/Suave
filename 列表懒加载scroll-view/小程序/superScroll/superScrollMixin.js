@@ -4,6 +4,9 @@ export const superScrollMixin = {
     data() {
         return {};
     },
+    mounted() {
+        querySelectorArr = null;
+    },
     methods: {
         // 数据添加
         supAddFun(data) {

@@ -114,6 +114,7 @@ export default {
         };
     },
     mounted() {
+        querySelectorArr = null;
         this.scrollFun();
         this.onScroll = throttleFun(this.scrollFun, this.delay);
     },
