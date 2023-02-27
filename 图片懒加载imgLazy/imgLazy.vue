@@ -1,9 +1,9 @@
 <template>
-    <view class="super-img-lazy">
+    <view class="super-img-lazy" :style="[inherit ? inheritStyle : {}, styleObj]">
         <!-- 占位 -->
-        <image class="super-img super-load" :src="loadSrc" @load="initFun" :style="[{ opacity: isShow ? '0' : '1' }, styleObj]" :mode="mode" />
+        <image class="super-img super-load" :src="loadSrc" @load="initFun" :style="[{ opacity: isShow ? '0' : '1' }, styleObj]" mode="aspectFill" />
         <!-- 失败 -->
-        <image class="super-img" :src="errSrc" v-if="state == 2" :style="[{ opacity: isShow ? '1' : '0' }, styleObj]" :mode="mode" />
+        <image class="super-img" :src="errSrc" v-if="state == 2" :style="[{ opacity: isShow ? '1' : '0' }, styleObj]" mode="aspectFill" />
         <!-- 成功 -->
         <image class="super-img" :src="src" @load="loadFun" @error="errorFun" v-else-if="state == 1" :style="[{ opacity: isShow ? '1' : '0' }, styleObj]" :mode="mode" />
     </view>
@@ -27,11 +27,12 @@ export default {
         /**
          * @property {String} loadSrc 占位图
          * @property {String} errSrc 失败图
-         * @property {String} src 图片
+         * @property {String | Object} src 图片
          * @property {Object} distanceShow 页面区域参照参数
          * @property {Number | String} waitTime 多少毫秒渲染图片
          * @property {Object} styleObj css样式
          * @property {String} mode 图片裁剪、缩放的模式
+         * @property {Number | String} inherit 父级宽度继承
          */
         loadSrc: {
             type: String,
@@ -42,7 +43,7 @@ export default {
             default: loadFailImage,
         },
         src: {
-            type: String,
+            type: [String, Object],
             default: '',
         },
         distanceShow: {
@@ -60,21 +61,26 @@ export default {
         styleObj: {
             type: Object,
             default: () => {
-                return {
-                    height: '200rpx',
-                    width: '200rpx',
-                };
+                return {};
             }
         },
         mode: {
             type: String,
             default: 'aspectFit'
-        }
+        },
+        inherit: {
+            type: [String, Number],
+            default: 0
+        },
     },
     data() {
         return {
             isShow: false,
             state: 0,
+            inheritStyle: {
+                width: '100%',
+                height: '100%',
+            },
         };
     },
     created() {
@@ -83,7 +89,6 @@ export default {
         this.$nextTick(() => {
             this.state = 1;
         });
-
     },
     methods: {
         // 初始化
@@ -143,6 +148,9 @@ export default {
 .super-img {
     will-change: transform;
     vertical-align: middle;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.3s linear;
 }
 .super-load {
     position: absolute;
