@@ -129,7 +129,7 @@ export default {
         },
         // 渲染失败
         errorFun() {
-            this.status = 2;
+            this.state = 2;
             this.isShow = true;
         },
     }
