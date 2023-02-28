@@ -26,7 +26,9 @@ export default {
     methods: {
         supScrollFun({ target, result, index }) {
             if (index != undefined) {
-
+                this.$forceUpdate();
+                let item = this.goodsList[index];
+                // 需求再次请求的item
             }
         },
         // 触底

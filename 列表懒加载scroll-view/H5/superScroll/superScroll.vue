@@ -7,7 +7,6 @@
 <script>
 import { querySelectorFun, throttleFun, arrayDetectionFun } from './common.js';
 import { superScrollMixin } from './superScrollMixin.js';
-let querySelectorArr = null;
 export default {
     mixins: [superScrollMixin],
     name: 'superScroll',
@@ -114,7 +113,6 @@ export default {
         };
     },
     mounted() {
-        querySelectorArr = null;
         this.scrollFun();
         this.onScroll = throttleFun(this.scrollFun, this.delay);
     },
@@ -122,9 +120,8 @@ export default {
         // 初始化 || 滚动时触发
         scrollFun(event = {}) {
             let { target } = event;
-            if (this.nodeFlag && this.selectorName && (!querySelectorArr || querySelectorArr.length)) {
+            if (this.nodeFlag && this.selectorName) {
                 this.querySelectorFun(this.selectorName, true).then(result => {
-                    querySelectorArr = result;
                     if (this.arrayDetectionFun(result)) {
                         result.map((iterator, index) => {
                             let { top } = iterator;

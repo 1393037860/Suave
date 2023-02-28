@@ -1,11 +1,7 @@
 let dataArr = [];
-let querySelectorArr = null;
 export const superScrollMixin = {
     data() {
         return {};
-    },
-    mounted() {
-        querySelectorArr = null;
     },
     methods: {
         // 数据添加
@@ -25,9 +21,8 @@ export const superScrollMixin = {
          */
         supScrollFun(evnet = {}, nodeFlag = false, selectorName = '') {
             let { target } = evnet;
-            if (nodeFlag && selectorName && (!querySelectorArr || querySelectorArr.length)) {
+            if (nodeFlag && selectorName) {
                 this.querySelectorFun(selectorName, true).then(result => {
-                    querySelectorArr = result;
                     if (this.arrayDetectionFun(result)) {
                         result.map((iterator, index) => {
                             let { top } = iterator;
