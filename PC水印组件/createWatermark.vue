@@ -1,8 +1,11 @@
 <script>
 // 页面像素
-let [lastPixelRatio, currentPixelRatio] = [window.devicePixelRatio, window.devicePixelRatio];
+let [lastPixelRatio, currentPixelRatio] = [
+    window.devicePixelRatio,
+    window.devicePixelRatio,
+];
 export default {
-    name: 'createWatermark',
+    name: "createWatermark",
     /**
      * 水印遮罩层vue版
      * @Author  chencz
@@ -21,25 +24,25 @@ export default {
         return {
             countValue: 1,
             observer: null,
-            maskWidth: '110vw',
+            maskWidth: "110vw",
         };
     },
     props: {
         angle: {
-            type: Number | String,
-            default: -10
+            type: [Number, String],
+            default: -10,
         },
         alpha: {
-            type: Number | String,
-            default: 0.2
+            type: [Number, String],
+            default: 0.2,
         },
         parasite: {
             type: String,
-            default: ''
+            default: "",
         },
         pattern: {
-            type: Number | String,
-            default: '0'
+            type: [Number, String],
+            default: "0",
         },
     },
     render(h) {
@@ -59,35 +62,41 @@ export default {
             let virtualDOM = [];
             let style = {
                 transform: `rotate(${this.angle}deg)`,
-                pointerEvents: 'inherit',
-                overflow: 'inherit',
-                fontFamily: 'Microsoft YaHei',
-                textAlign: 'center',
-                boxSizing: 'content-box',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                pointerEvents: "inherit",
+                overflow: "inherit",
+                fontFamily: "Microsoft YaHei",
+                textAlign: "center",
+                boxSizing: "content-box",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
             };
             // countValue 改变能让render函数重新渲染达到更新dom目的
             for (let i = 0; i < this.countValue; i++) {
-                virtualDOM.push(h('div', { class: 'watermark', style }, this.$slots.default && this.$slots.default));
+                virtualDOM.push(
+                    h(
+                        "div",
+                        { class: "watermark", style },
+                        this.$slots.default && this.$slots.default
+                    )
+                );
             }
 
             let obj = {
                 opacity: this.alpha,
-                position: 'fixed',
+                position: "fixed",
                 top: 0,
-                width: '100%',
-                height: '100%',
-                pointerEvents: 'none',
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignContent: 'flex-start',
-                overflow: 'hidden',
+                width: "100%",
+                height: "100%",
+                pointerEvents: "none",
+                display: "flex",
+                flexWrap: "wrap",
+                alignContent: "flex-start",
+                overflow: "hidden",
                 zIndex: 99999,
             };
             // 设置成行内样式, 为了能监听样式是否被篡改
-            return h('div', { class: 'mask', style: obj }, virtualDOM);
+            return h("div", { class: "mask", style: obj }, virtualDOM);
         },
         // DOM改变执行callback
         callback(mutations) {
@@ -95,16 +104,25 @@ export default {
             let { parentNode, offsetParent } = target;
             // 判断内容是否被篡改
             switch (type) {
-                case 'characterData':
+                case "characterData":
                     if (parentNode) {
-                        if (parentNode.offsetParent && parentNode.offsetParent._prevClass === 'watermark') {
+                        if (
+                            parentNode.offsetParent &&
+                            parentNode.offsetParent._prevClass === "watermark"
+                        ) {
                             window.location.reload();
                         }
                     }
                     return;
-                case 'attributes':
+                case "attributes":
                     if (parentNode) {
-                        if ((offsetParent && (offsetParent._prevClass === 'watermark' || offsetParent._prevClass === 'mask')) || oldValue === 'mask' || target._prevClass === 'mask') {
+                        if (
+                            (offsetParent &&
+                                (offsetParent._prevClass === "watermark" ||
+                                    offsetParent._prevClass === "mask")) ||
+                            oldValue === "mask" ||
+                            target._prevClass === "mask"
+                        ) {
                             // 判断页面是否正在缩放, 缩放也会导致样式变化, 则不触发
                             if (currentPixelRatio === lastPixelRatio) {
                                 window.location.reload();
@@ -113,12 +131,15 @@ export default {
                         }
                     }
                     return;
-                case 'childList':
-                    if (target._prevClass === 'mask') {
+                case "childList":
+                    if (target._prevClass === "mask") {
                         if (nextSibling) {
                             window.location.reload();
                         }
-                    } else if (offsetParent && offsetParent._prevClass === 'watermark') {
+                    } else if (
+                        offsetParent &&
+                        offsetParent._prevClass === "watermark"
+                    ) {
                         window.location.reload();
                     }
                     return;
@@ -132,7 +153,7 @@ export default {
         },
         // 监听dom变化
         Monitor() {
-            let body = document.getElementsByTagName('body')[0];
+            let body = document.getElementsByTagName("body")[0];
             let options = {
                 childList: true, // 观察目标子节点的变化，是否有添加或者删除
                 attributes: true, // 观察属性变动
@@ -144,11 +165,11 @@ export default {
             let observer = new MutationObserver(this.callback);
             observer.observe(body, options); // 监听body节点
 
-            this.$once('hook:beforeDestroy', () => {
+            this.$once("hook:beforeDestroy", () => {
                 observer.disconnect();
                 observer = null;
                 if (this.pattern == 0) {
-                    let mask = document.querySelector('.mask');
+                    let mask = document.querySelector(".mask");
                     mask && document.body.removeChild(mask);
                 }
             });
@@ -164,17 +185,25 @@ export default {
             }
             if (container) {
                 // 元素获取
-                let mask = document.querySelector('.mask');
-                let watermark_divAll = document.querySelectorAll('.watermark');
+                let mask = document.querySelector(".mask");
+                let watermark_divAll = document.querySelectorAll(".watermark");
                 let watermark_div = watermark_divAll[0];
                 if (watermark_div) {
-                    let [containerWidth, containerHeight] = [container.offsetWidth, container.offsetHeight];
-                    let [watermarkWidth, watermarkHeight] = [watermark_div.offsetWidth, watermark_div.offsetHeight];
+                    let [containerWidth, containerHeight] = [
+                        container.offsetWidth,
+                        container.offsetHeight,
+                    ];
+                    let [watermarkWidth, watermarkHeight] = [
+                        watermark_div.offsetWidth,
+                        watermark_div.offsetHeight,
+                    ];
 
                     // X轴能摆下几个元素
                     let residueWidth = containerWidth / watermarkWidth;
                     // Y轴能摆下几个元素
-                    let residueHeight = Math.ceil(containerHeight / watermarkHeight);
+                    let residueHeight = Math.ceil(
+                        containerHeight / watermarkHeight
+                    );
                     // 单个水印元素面积
                     let watermarkArea = watermarkWidth * watermarkHeight;
 
@@ -184,18 +213,23 @@ export default {
                         breadth = document.body.offsetWidth + watermarkWidth;
                     } else {
                         // 单个水印宽度 * X轴能摆下几个元素 + 单个水印宽度
-                        breadth = watermarkWidth * Math.ceil(residueWidth) + watermarkWidth;
+                        breadth =
+                            watermarkWidth * Math.ceil(residueWidth) +
+                            watermarkWidth;
                     }
-                    mask.style.width = breadth + 'px';
+                    mask.style.width = breadth + "px";
                     this.maskWidth = mask.style.width;
                     // 需要摆放几个水印元素 = 父元素面积 / 单个水印面积
-                    let current = Math.ceil(breadth * containerHeight / watermarkArea);
+                    let current = Math.ceil(
+                        (breadth * containerHeight) / watermarkArea
+                    );
 
                     if (index === 1) {
                         // 获取外层容器面积大小, 会因页面缩放有所改变
                         let outermostArea = containerWidth * containerHeight;
                         // 获取所有水印元素总面积
-                        let watermarkAllArea = watermarkArea * watermark_divAll.length;
+                        let watermarkAllArea =
+                            watermarkArea * watermark_divAll.length;
                         // 水印元素总面积是否大于当前改变的最外层面积, 减少dom频繁操作
                         if (watermarkAllArea < outermostArea) {
                             this.countValue = current;
@@ -215,8 +249,8 @@ export default {
     },
     destroyed() {
         window.removeEventListener("resize", this._resizeFun);
-    }
-}
+    },
+};
 </script>
 
 <style lang="scss" scoped></style>
